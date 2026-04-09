@@ -32,16 +32,15 @@ export default function Command() {
 
   useEffect(() => {
     if (!prefs.useSelectionSearch) return;
-    Promise.all([
-      getSelectedText().catch(() => ''),
-      Clipboard.readText().catch(() => ''),
-    ]).then(([selected, clipboard]) => {
-      const trimmed = selected.trim();
-      // Skip if the "selected" text is identical to the clipboard — it's not a real selection
-      if (trimmed && trimmed !== clipboard?.trim()) {
-        setSearchText(trimmed);
+    Promise.all([getSelectedText().catch(() => ''), Clipboard.readText().catch(() => '')]).then(
+      ([selected, clipboard]) => {
+        const trimmed = selected.trim();
+        // Skip if the "selected" text is identical to the clipboard — it's not a real selection
+        if (trimmed && trimmed !== clipboard?.trim()) {
+          setSearchText(trimmed);
+        }
       }
-    });
+    );
   }, []);
 
   const trimmed = searchText.trim().toUpperCase();
@@ -56,7 +55,7 @@ export default function Command() {
       headers: { Authorization: `Bearer ${prefs.jiraToken}`, Accept: 'application/json' },
       execute: !searchText,
       keepPreviousData: true,
-    },
+    }
   );
 
   // Map picker history results to JiraIssue shape
@@ -81,7 +80,12 @@ export default function Command() {
 
   const jql = jqlPart ? `${jqlPart}${typeClause} ORDER BY updated DESC` : '';
 
-  const { issues: rawIssues, isLoading: searchLoading, error, baseUrl: searchBaseUrl } = useJiraSearch(jql, {
+  const {
+    issues: rawIssues,
+    isLoading: searchLoading,
+    error,
+    baseUrl: searchBaseUrl,
+  } = useJiraSearch(jql, {
     execute: !!jqlPart,
   });
 
